@@ -25,7 +25,7 @@ function crossover(parent1, parent2, child1, child2, lchrom,
     var j = 0;
     if (randrout.flip(pcross))
     {
-        jcross = randrout.rnd(0, lchrom - 2);
+        jcross = randrout.rnd(1, lchrom - 1);
         ncross++;
     }
     else
@@ -33,7 +33,7 @@ function crossover(parent1, parent2, child1, child2, lchrom,
         jcross = lchrom;
     }
 
-    for (var i = 0; i < jcross; i++)
+    for (var i = 1; i < jcross; i++)
     {
         child1[j] = mutation(parent1[j], pmutation, nmutation);
         child2[j] = mutation(parent2[j], pmutation, nmutation);
@@ -54,5 +54,12 @@ function crossover(parent1, parent2, child1, child2, lchrom,
  */
 function mutation(alleleval, pmutation, nmutation)
 {
-
+    var mutatedbit = alleleval;
+    var mutate = randchoicerout.flip(pmutation);
+    if (mutate)
+    {
+        nmutation++;
+        mutatedbit = alleleval == 1 ? 0 : 1;
+    }
+    return mutatedbit;
 }
