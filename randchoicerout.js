@@ -1,5 +1,4 @@
-var Rand = function()
-{
+var Rand = {
     random: function()
     {
         return Math.random();
@@ -10,7 +9,8 @@ var Rand = function()
     },
     rnd: function(a, b)
     {
-        return Math.floor(Math.round() * (b - a + 1)) + a;
+        return Math.floor(Math.random() * (b - a + 1)) + a;
     }
-}
-exports.module = Rand;
+};
+
+module.exports = Rand;
