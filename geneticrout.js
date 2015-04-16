@@ -75,7 +75,7 @@ function generation(oldpop, newpop, popsize, sumfiteness, lchrom, ncross, nmutat
     do {
         mate1 = select(popsize, sumfiteness, oldpop);
         mate2 = select(popsize, sumfiteness, oldpop);
-        crossover(oldpop[mate1].chrom, oldpop[mate2].chrom, newpop[j].chrom, newpop[j].chrom, lchrom, ncross, nmutation, jcross, pcross, pmutation);
+        crossover(oldpop[mate1].chrom, oldpop[mate2].chrom, newpop[j].chrom, newpop[j + 1].chrom, lchrom, ncross, nmutation, jcross, pcross, pmutation);
         jChild = newpop[j];
         j1Child = newpop[j + 1];
         jChild.x = approut.decode(jChild.chrom, lchrom);
