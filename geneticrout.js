@@ -167,12 +167,12 @@ function statistics(popsize, pop)
     {
         var fit = pop[j].fitness;
         sumfiteness += fit;
-        if (fit > max)
+        if (max > fit)
         {
             max = fit;
         }
 
-        if (min < fit)
+        if (fit < min)
         {
             min = fit;
         }
