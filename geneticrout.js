@@ -13,7 +13,7 @@ function select(popsize, sumfiteness, population)
         partsum += population[j].fitness;
         j++;
     }
-    while (!((partsum >= rand) || (j == popsize)))
+    while (partsum < rand && j != popsize)
     return j;
 }
 
@@ -26,18 +26,23 @@ function crossover(parent1, parent2, child1, child2, lchrom,
     var j = 0;
     if (randrout.flip(pcross))
     {
-        jcross = randrout.rnd(1, lchrom - 1);
+        jcross = randrout.rnd(1, lchrom - 2);
         ncross++;
     }
     else
     {
-        jcross = lchrom;
+        jcross = lchrom - 1;
     }
 
     for (var i = 1; i < jcross; i++)
     {
-        child1[j] = mutation(parent1[j], pmutation, nmutation);
-        child2[j] = mutation(parent2[j], pmutation, nmutation);
+        p1 = mutation(parent1[j], pmutation, nmutation);
+        nmutation = p1.n;
+        p2 = mutation(parent2[j], pmutation, nmutation);
+        nmutation = p2.n;
+        child1[j] = p1.m;
+        child2[j] = p2.m;
+
     }
 
     if (jcross != lchrom)
@@ -48,6 +53,12 @@ function crossover(parent1, parent2, child1, child2, lchrom,
             child2[j] = mutation(parent1[j], pmutation, nmutation);
         }
     }
+
+    return {
+        j: jcross,
+        n: ncross,
+        nm: nmutation
+    };
 }
 
 /*
@@ -56,26 +67,32 @@ function crossover(parent1, parent2, child1, child2, lchrom,
 function mutation(alleleval, pmutation, nmutation)
 {
     var mutatedbit = alleleval;
-    var mutate = randchoicerout.flip(pmutation);
+    var mutate = randrout.flip(pmutation);
     if (mutate)
     {
         nmutation++;
         mutatedbit = alleleval == 1 ? 0 : 1;
     }
-    return mutatedbit;
+    return {
+        m: mutatedbit,
+        n: nmutation
+    };
 }
 
 /*
  * Get a new generation of population from the older one.
  */
-function generation(oldpop, newpop, popsize, sumfiteness, lchrom, ncross, nmutation, jcross, pcross, pmutation)
+function generation(oldpop, newpop, popsize, lchrom, ncross, nmutation, pcross, pmutation, sumfiteness)
 {
-    var j, mate1, mate2;
+    var j, mate1, mate2, jcross;
     j = 0;
     do {
         mate1 = select(popsize, sumfiteness, oldpop);
         mate2 = select(popsize, sumfiteness, oldpop);
-        crossover(oldpop[mate1].chrom, oldpop[mate2].chrom, newpop[j].chrom, newpop[j + 1].chrom, lchrom, ncross, nmutation, jcross, pcross, pmutation);
+        c = crossover(oldpop[mate1].chrom, oldpop[mate2].chrom, newpop[j].chrom, newpop[j + 1].chrom, lchrom, ncross, nmutation, jcross, pcross, pmutation);
+        nmutation = c.nm;
+        jcross = c.j;
+        ncross = c.n;
         jChild = newpop[j];
         j1Child = newpop[j + 1];
         jChild.x = approut.decode(jChild.chrom, lchrom);
@@ -88,3 +105,95 @@ function generation(oldpop, newpop, popsize, sumfiteness, lchrom, ncross, nmutat
         j += 2;
     } while (j < popsize)
 }
+
+function evolution()
+{
+    var gen = 0,
+        stats;
+    var nmutation = 0,
+        ncross = 0,
+        lchrom = 30,
+        pmutation = 0.0333,
+        pcross = 0.6,
+        popsize = 30,
+        MAX_GENERATION = 20;
+
+    var oldpop = init_population(popsize, lchrom);
+    var newpop = oldpop.slice();
+    var sumfiteness = statistics(popsize, oldpop).sumfiteness;
+    do {
+        gen++;
+        generation(oldpop, newpop, popsize, lchrom, ncross, nmutation, pcross, pmutation, sumfiteness);
+        stats = statistics(popsize, newpop);
+        sumfiteness = stats.sumfiteness;
+        report(gen, stats);
+        oldpop = newpop;
+    } while (gen < MAX_GENERATION)
+}
+
+function init_population(popsize, lchrom)
+{
+    var pop = [];
+
+    for (var j = 0; j < popsize; j++)
+    {
+        var chrom = [];
+        for (var j1 = 0; j1 < lchrom; j1++)
+        {
+            chrom.push(randrout.flip(0.5) ? 1 : 0);
+        }
+        var x = approut.decode(chrom, lchrom);
+        pop.push(
+        {
+            chrom: chrom,
+            x: x,
+            fitness: approut.objfunc(x),
+            parent1: 0,
+            parent2: 0,
+            xsite: 0
+        })
+    }
+
+    return pop;
+}
+
+function statistics(popsize, pop)
+{
+    var sumfiteness = pop[0].fitness;
+    var min = pop[0].fitness;
+    var max = pop[0].fitness;
+
+    for (var j = 1; j < pop.length; ++j)
+    {
+        var fit = pop[j].fitness;
+        sumfiteness += fit;
+        if (fit > max)
+        {
+            max = fit;
+        }
+
+        if (min < fit)
+        {
+            min = fit;
+        }
+    }
+
+    var avg = sumfiteness / popsize;
+
+    return {
+        min: min,
+        max: max,
+        avg: avg,
+        sum: sumfiteness
+    }
+}
+
+function report(generation, stats)
+{
+    console.log('#######################################');
+    console.log('Statistics for Generation ' + generation);
+    console.log('min: ' + stats.min + ', max: ' + stats.max + ', avg: ' + stats.avg + ', sumfiteness: ' + stats.sum);
+    console.log('########################################');
+}
+
+evolution();

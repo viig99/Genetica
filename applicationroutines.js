@@ -19,7 +19,7 @@ var AppRoute = {
     {
         var coef = 1073741823;
         var n = 10;
-        return Math.power(x / coef, n);
+        return Math.pow(x / coef, n);
     }
 };
 
